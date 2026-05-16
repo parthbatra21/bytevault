@@ -10,7 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +43,6 @@ public class AppService {
             Files.createDirectories(Paths.get(uploadDir));
             String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
 
-            // 1. Create and save the main file entity first to get its ID
             AppEntity fileEntity = new AppEntity();
             fileEntity.setFileName(fileName);
             fileEntity.setSize(file.getSize());
@@ -56,7 +57,6 @@ public class AppService {
                     String chunkPath = uploadDir + fileName + ".chunk" + chunkNumber;
                     Files.write(Paths.get(chunkPath), Arrays.copyOf(buffer, bytesRead));
 
-                    // 2. Link each chunk to the saved file entity
                     ChunkMetaData metadata = new ChunkMetaData();
                     metadata.setFileId(fileEntity.getId());
                     metadata.setChunkNumber(chunkNumber);
@@ -72,6 +72,39 @@ public class AppService {
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to save file", e);
+        }
+    }
+
+    public void deleteFile(String id) {
+        // 1. Find and delete physical chunk files
+        List<ChunkMetaData> chunks = chunkRepository.findByFileIdOrderByChunkNumberAsc(id);
+        for (ChunkMetaData chunk : chunks) {
+            try {
+                Files.deleteIfExists(Paths.get(chunk.getFilePath()));
+            } catch (IOException e) {
+                System.err.println("Failed to delete chunk file: " + chunk.getFilePath());
+            }
+        }
+        
+        // 2. Delete chunk metadata from DB
+        chunkRepository.deleteAll(chunks);
+        
+        // 3. Delete main file entity from DB
+        repository.deleteById(id);
+    }
+
+    public void reassembleAndStream(String id, OutputStream out) {
+        List<ChunkMetaData> chunks = chunkRepository.findByFileIdOrderByChunkNumberAsc(id);
+        if (chunks.isEmpty()) {
+            throw new RuntimeException("File chunks not found");
+        }
+
+        for (ChunkMetaData chunk : chunks) {
+            try {
+                Files.copy(Paths.get(chunk.getFilePath()), out);
+            } catch (IOException e) {
+                throw new RuntimeException("Error during file reassembly", e);
+            }
         }
     }
 
