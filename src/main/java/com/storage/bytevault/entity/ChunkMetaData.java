@@ -8,11 +8,11 @@ import lombok.Data;
 
 @Data
 @Entity
-public class AppEntity {
+public class ChunkMetaData {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    private String fileName;
-    private Long size;
-    private Integer totalChunks;
+    private String fileId;
+    private int chunkNumber;
+    private String filePath;
 }
