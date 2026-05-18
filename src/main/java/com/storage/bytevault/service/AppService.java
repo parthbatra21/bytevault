@@ -23,6 +23,8 @@ import java.util.UUID;
 public class AppService {
     private static final int CHUNK_SIZE = 1024 * 1024; // 1MB
 
+    private static final String[] STORAGE_NODES = {"storage/node1/","storage/node2/","storage/node3/","storage/node4/"};
+
     @Autowired
     private AppRepository repository;
 
@@ -39,8 +41,9 @@ public class AppService {
         }
 
         try {
-            String uploadDir = "uploads/";
-            Files.createDirectories(Paths.get(uploadDir));
+            for(String node : STORAGE_NODES) {
+                Files.createDirectories(Paths.get(node));
+            }
             String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
 
             AppEntity fileEntity = new AppEntity();
@@ -54,9 +57,9 @@ public class AppService {
                 int bytesRead;
 
                 while ((bytesRead = inputStream.read(buffer)) > 0) {
-                    String chunkPath = uploadDir + fileName + ".chunk" + chunkNumber;
+                    String chunkPath = STORAGE_NODES[chunkNumber % STORAGE_NODES.length] + fileName + ".chunk" + chunkNumber;
                     Files.write(Paths.get(chunkPath), Arrays.copyOf(buffer, bytesRead));
-
+                    System.out.println("Chunk " + chunkNumber + " saved to " + chunkPath);
                     ChunkMetaData metadata = new ChunkMetaData();
                     metadata.setFileId(fileEntity.getId());
                     metadata.setChunkNumber(chunkNumber);
