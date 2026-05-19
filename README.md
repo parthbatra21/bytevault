@@ -1,28 +1,13 @@
-This is ByteVault — a Google Drive–like object storage system I’ve been building to understand how large-scale storage systems actually work internally rather than just consuming cloud APIs.
+ByteVault is basically a Google Drive–style storage system I started building because I wanted to understand how large-scale storage systems actually work internally instead of just using cloud APIs blindly.
 
-The main focus of the project is scalable file storage, chunking large files, streaming downloads efficiently, and designing the backend architecture in a way that could later evolve into a distributed storage system.
+The core idea is handling large files efficiently using chunking, streaming, replication, and distributed storage concepts.
 
-The project is built using Spring Boot and follows a layered architecture.
+When a user uploads a file, the backend splits it into smaller chunks instead of storing it as one huge file. Those chunks are then distributed across multiple storage nodes, and replicas are also maintained for fault tolerance in case a node fails or a chunk gets corrupted.
 
-I’ve separated the application into controllers, services, repositories, entities, and storage logic to keep concerns isolated and maintainable.
+I built it using Java 21 and Spring Boot with a layered backend architecture, so controllers, services, repositories, and storage logic are all separated cleanly.
 
-The upload flow works like this:
+One thing I specifically focused on was memory efficiency during downloads. Instead of rebuilding the entire file in memory, the system streams chunks and reassembles them on the fly using piped streams, which is much closer to how production systems handle large objects.
 
-the client uploads a file → the backend processes it → splits it into chunks → stores those chunks separately → and maintains metadata for reconstruction later.
+The project started as a simple file upload system, but gradually evolved into something much more systems-oriented involving chunk management, replication strategies, streaming I/O, and distributed storage concepts.
 
-One engineering decision I made was chunking files instead of storing everything as a single binary blob.
-
-Chunking improves scalability and is similar to how distributed storage systems handle large files internally.
-
-This also creates flexibility for future distributed replication because chunks can later be stored across different storage nodes independently.
-
-For downloads, I specifically wanted to avoid loading entire files into memory because that becomes inefficient for large files.
-
-So instead of reconstructing the complete file in RAM, I implemented streaming using piped streams.
-This makes the system much more memory efficient and closer to production-style backend handling for large objects
-I focused a lot on maintainability and separation of concerns while building this.
-
-Business logic is isolated in services, controllers remain lightweight, and storage handling is abstracted cleanly.
-Some future improvements I’m planning are distributed replication, async processing, Dockerized deployment, and object deduplication.
-
-Overall, this project was mainly driven by curiosity around backend systems and storage internals, and it helped me think much more deeply about scalability, memory efficiency, and system design beyond just building CRUD applications.
+Right now I’m working on improving replication handling, checksum validation for corruption detection, and making the storage nodes more distributed and fault tolerant. Later I also want to add async replication, Dockerized deployment, and cloud-style object storage features.
