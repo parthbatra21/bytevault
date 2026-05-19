@@ -8,11 +8,10 @@ import lombok.Data;
 
 @Data
 @Entity
-public class ChunkMetaData {
+public class ReplicaChunkMetadata {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    private String fileId;
-    private int chunkNumber;
-    private String checksum;
+    private String chunkId;
+    private String nodeName; 
 }
