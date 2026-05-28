@@ -2,7 +2,8 @@ package com.storage.bytevault.controller;
 
 import com.storage.bytevault.entity.AppEntity;
 import com.storage.bytevault.service.AppService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -16,12 +17,12 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/")
 public class AppController {
 
-    @Autowired
-    private AppService service;
+    private final AppService service;
 
     @GetMapping("/files")
     public List<AppEntity> getAllFiles() {

@@ -6,7 +6,7 @@ import com.storage.bytevault.entity.ReplicaChunkMetadata;
 import com.storage.bytevault.repository.AppRepository;
 import com.storage.bytevault.repository.ChunkMetaDataRepository;
 import com.storage.bytevault.repository.ReplicaChunkMetadataRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @Service
 @Transactional
 public class AppService {
@@ -31,14 +32,11 @@ public class AppService {
 
     private static final String[] STORAGE_NODES = {"storage/node1/","storage/node2/","storage/node3/","storage/node4/"};
 
-    @Autowired
-    private AppRepository repository;
+    private final AppRepository repository;
 
-    @Autowired
-    private ChunkMetaDataRepository chunkRepository;
+    private final ChunkMetaDataRepository chunkRepository;
 
-    @Autowired
-    private ReplicaChunkMetadataRepository replicaRepository;
+    private final ReplicaChunkMetadataRepository replicaRepository;
 
     public List<AppEntity> getFiles() {
         return repository.findAll();
